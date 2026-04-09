@@ -221,7 +221,6 @@ src/s2t/
 
 # Files
 settings.local.json
-LONGFORM_TECHNICAL_REPORT.md
 *.jit
 *.pth
 *.safetensors
