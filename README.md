@@ -59,15 +59,15 @@ asr-pytorch-exp/
 │   │   ├── model.py                    # Full native PyTorch encoder-decoder + memory
 │   │   ├── inference.py                # Long-form & short-form inference pipeline
 │   │   ├── convert.py                  # Weight conversion: HuggingFace .safetensors → .pth
-│   │   └── LONGFORM_TECHNICAL_REPORT.md
 │   │
 │   ├── longform.py                     # Shared long-form helpers (budget, health checks, stitching)
 │   └── vad.py                          # Silero VAD + smart chunking (shared with s2t/)
 │
 ├── storage/
-│   ├── moonshine/
+│   ├── .cache/                         # HuggingFace blob cache (set by convert.py --download)
+│   ├── moonshine/                      # Model files — populated by convert.py --download
+│   │   ├── model.safetensors           # Original HuggingFace weights (downloaded)
 │   │   ├── model.pth                   # Converted weights (native format, used at runtime)
-│   │   ├── model.safetensors           # Original HuggingFace weights
 │   │   ├── tokenizer.json              # BPE tokenizer (32768 vocab)
 │   │   └── tokenizer_config.json
 │   │
@@ -753,15 +753,62 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### 9.3 Weight conversion (if starting from HuggingFace)
+### 9.3 Getting the model weights
 
-If you only have `model.safetensors` and need `model.pth`:
+`convert.py` handles both downloading and converting in a single command.
+
+**Option A — Download from HuggingFace and convert automatically (recommended):**
 
 ```bash
-python src/moonshine_streaming/convert.py \
-    --input  storage/moonshine/model.safetensors \
-    --output storage/moonshine/model.pth
+# Windows
+venv\Scripts\python.exe src\moonshine_streaming\convert.py --download
+
+# Linux / macOS
+venv/bin/python src/moonshine_streaming/convert.py --download
 ```
+
+This will:
+1. Download `UsefulSensors/moonshine-streaming-tiny` from HuggingFace.
+2. Store the HuggingFace blob cache in `storage/.cache/`.
+3. Write all model files (safetensors, tokenizer, config) into `storage/moonshine/`.
+4. Convert `model.safetensors` → `storage/moonshine/model.pth` automatically.
+
+After this command, the directory layout will be:
+
+```
+storage/
+├── .cache/              ← HuggingFace blob cache
+└── moonshine/
+    ├── model.safetensors
+    ├── model.pth        ← ready for inference
+    ├── tokenizer.json
+    └── config.json
+```
+
+**Option B — Convert only (already have `model.safetensors` locally):**
+
+```bash
+# Windows
+venv\Scripts\python.exe src\moonshine_streaming\convert.py \
+    --input  storage\moonshine\model.safetensors
+
+# Linux / macOS
+venv/bin/python src/moonshine_streaming/convert.py \
+    --input  storage/moonshine/model.safetensors
+```
+
+**Option C — Custom input and output paths:**
+
+```bash
+venv/bin/python src/moonshine_streaming/convert.py \
+    --input  path/to/model.safetensors \
+    --output path/to/model.pth
+```
+
+> **Note:** `--download` requires `huggingface_hub`. Install it with:
+> ```bash
+> pip install huggingface-hub
+> ```
 
 ---
 

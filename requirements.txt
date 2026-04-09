@@ -11,3 +11,4 @@ librosa
 tokenizers
 psutil
 jiwer
+transformers
