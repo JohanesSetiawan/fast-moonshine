@@ -1,0 +1,13 @@
+torch
+torchaudio
+--extra-index-url https://download.pytorch.org/whl/cu130
+
+safetensors
+soundfile
+numpy
+sentencepiece
+scipy
+librosa
+tokenizers
+psutil
+jiwer
